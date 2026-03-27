@@ -16,7 +16,6 @@
 
 **Integrate state-of-the-art DNA foundation models — Nucleotide Transformer, Geneformer — into DeepChem's training, evaluation, and pre-training infrastructure.**
 
-[Overview](#overview) · [Architecture](#architecture) · [Quick Start](#quick-start) · [API](#api-reference) · [Benchmarks](#benchmarks) · [12-Week Timeline](#gsoc-12-week-timeline) · [Contributing](#contributing)
 
 </div>
 
