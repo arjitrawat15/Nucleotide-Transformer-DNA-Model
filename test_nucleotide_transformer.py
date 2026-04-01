@@ -1,41 +1,18 @@
-"""
-Tests for NucleotideTransformerModel and DNA Featurizers
-=========================================================
+""" Tests for NucleotideTransformerModel and DNA Featurizers
 Mirrors DeepChem test conventions (test_chemberta.py, test_molformer.py).
-
-Run:
-    pytest deepchem/models/torch_models/tests/test_nucleotide_transformer.py -v
-"""
+Run: pytest deepchem/models/torch_models/tests/test_nucleotide_transformer.py -v """
 
 import numpy as np
 import pytest
-
 transformers = pytest.importorskip("transformers")
 torch        = pytest.importorskip("torch")
 dc           = pytest.importorskip("deepchem")
-
-from deepchem.models.torch_models.nucleotide_transformer import (
-    NucleotideTransformerModel,
-    NUCLEOTIDE_TRANSFORMER_MODELS,
-)
-from deepchem.feat.sequence_featurizers.dna_tokenizer_featurizer import (
-    DNATokenizerFeaturizer,
-    KMerDNAFeaturizer,
-)
-
-# ── fixtures ──────────────────────────────────────────────────────────────────
+from deepchem.models.torch_models.nucleotide_transformer import ( NucleotideTransformerModel,NUCLEOTIDE_TRANSFORMER_MODELS,)
+from deepchem.feat.sequence_featurizers.dna_tokenizer_featurizer import (DNATokenizerFeaturizer,KMerDNAFeaturizer,)
 
 SMALL_MODEL = "InstaDeepAI/nucleotide-transformer-v2-100m-multi-species"
 MAX_LEN     = 64
-
-DNA_SEQS = [
-    "ATCGATCGATCGATCGATCG",
-    "GCTAGCTAGCTAGCTAGCTA",
-    "TTTTAAAACCCCGGGG",
-    "ACGTACGTACGTACGT",
-    "GGGGCCCCAAAATTTT",
-    "ATATATATATATATAT",
-]
+DNA_SEQS = ["ATCGATCGATCGATCGATCG","GCTAGCTAGCTAGCTAGCTA","TTTTAAAACCCCGGGG","ACGTACGTACGTACGT","GGGGCCCCAAAATTTT","ATATATATATATATAT",]
 LABELS_CLF = np.array([[1], [0], [1], [0], [1], [0]], dtype=np.float32)
 LABELS_REG = np.array([[0.5], [1.2], [-0.3], [0.8], [2.1], [-1.0]], dtype=np.float32)
 
@@ -48,11 +25,8 @@ def make_reg_dataset():
     return dc.data.NumpyDataset(
         X=np.array(DNA_SEQS, dtype=object), y=LABELS_REG)
 
-
-# ── featurizer tests ──────────────────────────────────────────────────────────
-
 class TestDNATokenizerFeaturizer:
-
+    
     def test_output_shape(self):
         feat = DNATokenizerFeaturizer(SMALL_MODEL, max_length=MAX_LEN)
         out  = feat.featurize(DNA_SEQS)
@@ -103,8 +77,6 @@ class TestKMerDNAFeaturizer:
         assert out.sum() == 4
 
 
-# ── model tests ───────────────────────────────────────────────────────────────
-
 class TestNucleotideTransformerModel:
 
     @pytest.fixture
@@ -122,8 +94,6 @@ class TestNucleotideTransformerModel:
             model_path=SMALL_MODEL,
             max_seq_length=MAX_LEN, batch_size=2,
             model_dir=str(tmp_path))
-
-    # ── smoke ──────────────────────────────────────────────────────────────
 
     def test_classification_fit_predict(self, clf_model):
         ds   = make_clf_dataset()
@@ -143,8 +113,6 @@ class TestNucleotideTransformerModel:
         pred = clf_model.predict(ds)
         assert np.all(np.isfinite(pred))
 
-    # ── embeddings ─────────────────────────────────────────────────────────
-
     def test_embeddings_mean_shape(self, clf_model):
         embs   = clf_model.get_embeddings(DNA_SEQS, pooling="mean")
         hidden = clf_model.model.backbone.config.hidden_size
@@ -158,8 +126,6 @@ class TestNucleotideTransformerModel:
     def test_embeddings_finite(self, clf_model):
         embs = clf_model.get_embeddings(DNA_SEQS)
         assert np.all(np.isfinite(embs))
-
-    # ── save / restore ─────────────────────────────────────────────────────
 
     def test_save_restore(self, clf_model, tmp_path):
         ds     = make_clf_dataset()
@@ -176,8 +142,6 @@ class TestNucleotideTransformerModel:
         after = restored.predict(ds)
 
         np.testing.assert_allclose(before, after, rtol=1e-4)
-
-    # ── edge cases ─────────────────────────────────────────────────────────
 
     def test_long_sequence_truncated(self, clf_model):
         long = ["ATCG" * 400]
@@ -202,8 +166,6 @@ class TestNucleotideTransformerModel:
         ds = make_clf_dataset()
         with pytest.raises(NotImplementedError):
             clf_model.pretrain(ds)
-
-    # ── model registry ─────────────────────────────────────────────────────
 
     def test_model_registry_keys(self):
         assert "v2-100m-multi-species" in NUCLEOTIDE_TRANSFORMER_MODELS
