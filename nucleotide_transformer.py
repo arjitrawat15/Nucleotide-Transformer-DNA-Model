@@ -19,20 +19,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 logger = logging.getLogger(__name__)
-
-try:
-    from deepchem.models.losses import L2Loss, SigmoidCrossEntropy
-    from deepchem.models.torch_models.torch_model import TorchModel
-    HAS_DC = True
-except ImportError:
-    HAS_DC = False
-    class TorchModel:
-        pass
-try:
-    from transformers import AutoModel, AutoTokenizer
-    HAS_TRANSFORMERS = True
-except ImportError:
-    HAS_TRANSFORMERS = False
+from deepchem.models.losses import L2Loss, SigmoidCrossEntropy
+from deepchem.models.torch_models.torch_model import TorchModel
+from transformers import AutoModel, AutoTokenizer
     
 NUCLEOTIDE_TRANSFORMER_MODELS: Dict[str, str] = {"v2-100m-multi-species":"InstaDeepAI/nucleotide-transformer-v2-100m-multi-species",
     "v2-250m-multi-species":"InstaDeepAI/nucleotide-transformer-v2-250m-multi-species",
