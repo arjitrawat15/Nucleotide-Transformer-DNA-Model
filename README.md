@@ -31,13 +31,13 @@ This project extends DeepChem — the leading open-source library for deep learn
 
 | Component | Status | Description |
 |-----------|--------|-------------|
-| `NucleotideTransformerModel` | ✅ Prototype | Full `TorchModel` subclass wrapping InstaDeepAI's NT family |
-| `DNATokenizerFeaturizer` | ✅ Prototype | HF-tokenizer wrapper inheriting `dc.feat.Featurizer` |
-| `KMerDNAFeaturizer` | ✅ Prototype | Bag-of-k-mers baseline featurizer |
-| Test suite | ✅ 17 tests | Mirrors `test_chemberta.py` conventions |
-| Demo notebook | ✅ Ready | End-to-end pipeline in < 5 min |
-| Continued pre-training | 🔧 Planned | MLM loop — GSoC Weeks 8–9 |
-| Geneformer wrapper | 🔧 Planned | Single-cell RNA model — GSoC Week 10 |
+| `NucleotideTransformerModel` | Prototype | Full `TorchModel` subclass wrapping InstaDeepAI's NT family |
+| `DNATokenizerFeaturizer` |  Prototype | HF-tokenizer wrapper inheriting `dc.feat.Featurizer` |
+| `KMerDNAFeaturizer` |  Prototype | Bag-of-k-mers baseline featurizer |
+| Test suite |  17 tests | Mirrors `test_chemberta.py` conventions |
+| Demo notebook | Ready | End-to-end pipeline in < 5 min |
+| Continued pre-training | Planned | MLM loop — GSoC Weeks 8–9 |
+| Geneformer wrapper |  Planned | Single-cell RNA model — GSoC Week 10 |
 
 ---
 
