@@ -1,45 +1,23 @@
-"""
-NucleotideTransformer Model for DeepChem
-==========================================
+""" NucleotideTransformer Model for DeepChem
 Wraps InstaDeepAI's Nucleotide Transformer family into DeepChem's
 TorchModel infrastructure — following the same pattern as ChemBERTa
 (chemberta.py) and MolFormer (molformer.py).
 
-Architecture
-------------
+Architecture ->
     DNA string(s)
         └─► DNATokenizerFeaturizer   (6-mer / BPE tokenisation)
                 └─► NT Backbone      (ESM-style bidirectional transformer)
                         └─► mean-pool last hidden state
                                 └─► LayerNorm → Dropout → Linear → GELU
                                         └─► Linear → logits / scalar
-
-Supported backbone sizes
-------------------------
-    v2-100m   InstaDeepAI/nucleotide-transformer-v2-100m-multi-species
-    v2-250m   InstaDeepAI/nucleotide-transformer-v2-250m-multi-species
-    v2-500m   InstaDeepAI/nucleotide-transformer-v2-500m-multi-species
-    500m-hr   InstaDeepAI/nucleotide-transformer-500m-human-ref
-    2.5b      InstaDeepAI/nucleotide-transformer-2.5b-multi-species
-
-References
-----------
-Dalla-Torre et al. (2023). The Nucleotide Transformer.
-https://doi.org/10.1101/2023.01.11.523679
-
-GSoC 2026 — DeepChem: Single Cell and DNA Foundation Models
-Author : Arjit (arjit@example.com)
 """
 
 from __future__ import annotations
-
 import logging
 from typing import Dict, Iterable, List, Optional
-
 import numpy as np
 import torch
 import torch.nn as nn
-
 logger = logging.getLogger(__name__)
 
 try:
@@ -48,31 +26,21 @@ try:
     HAS_DC = True
 except ImportError:
     HAS_DC = False
-    class TorchModel:  # type: ignore
+    class TorchModel:
         pass
-
 try:
     from transformers import AutoModel, AutoTokenizer
     HAS_TRANSFORMERS = True
 except ImportError:
     HAS_TRANSFORMERS = False
     
-NUCLEOTIDE_TRANSFORMER_MODELS: Dict[str, str] = {
-    "v2-100m-multi-species":
-        "InstaDeepAI/nucleotide-transformer-v2-100m-multi-species",
-    "v2-250m-multi-species":
-        "InstaDeepAI/nucleotide-transformer-v2-250m-multi-species",
-    "v2-500m-multi-species":
-        "InstaDeepAI/nucleotide-transformer-v2-500m-multi-species",
-    "500m-human-ref":
-        "InstaDeepAI/nucleotide-transformer-500m-human-ref",
-    "500m-multi-species":
-        "InstaDeepAI/nucleotide-transformer-500m-multi-species",
-    "2.5b-multi-species":
-        "InstaDeepAI/nucleotide-transformer-2.5b-multi-species",
-    "2.5b-1000g":
-        "InstaDeepAI/nucleotide-transformer-2.5b-1000g",
-}
+NUCLEOTIDE_TRANSFORMER_MODELS: Dict[str, str] = {"v2-100m-multi-species":"InstaDeepAI/nucleotide-transformer-v2-100m-multi-species",
+    "v2-250m-multi-species":"InstaDeepAI/nucleotide-transformer-v2-250m-multi-species",
+    "v2-500m-multi-species":"InstaDeepAI/nucleotide-transformer-v2-500m-multi-species",
+    "500m-human-ref":"InstaDeepAI/nucleotide-transformer-500m-human-ref",
+    "500m-multi-species":"InstaDeepAI/nucleotide-transformer-500m-multi-species",
+    "2.5b-multi-species":"InstaDeepAI/nucleotide-transformer-2.5b-multi-species",
+    "2.5b-1000g":"InstaDeepAI/nucleotide-transformer-2.5b-1000g",}
 DEFAULT_NT_MODEL = "v2-100m-multi-species"
 
 class _NTModule(nn.Module):
@@ -137,51 +105,23 @@ class _NTModule(nn.Module):
 
 
 class NucleotideTransformerModel(TorchModel):
-    """
-    DeepChem wrapper for the InstaDeepAI Nucleotide Transformer.
-
-    Follows the same API contract as ``ChemBERTa`` and ``MolFormer``:
-    ``fit()``, ``predict()``, ``evaluate()``, ``save_checkpoint()``,
-    and ``restore()`` all work without modification.
-
-    Parameters
-    ----------
-    n_tasks : int
-        Number of output tasks.
-    mode : str
-        ``'classification'`` or ``'regression'``.
-    model_path : str
-        Short key from ``NUCLEOTIDE_TRANSFORMER_MODELS``, full HuggingFace
-        model ID, or path to a local directory.
-    max_seq_length : int
-        Token-level maximum length (6-mer tokens ≈ 6 bp each, so 512
-        tokens ≈ 3 kb of DNA).
-    freeze_backbone : bool
-        Freeze transformer weights; train only the task head.
-    head_dropout : float
-    batch_size : int
-    learning_rate : float
-    **kwargs
-        Forwarded to :class:`~deepchem.models.torch_models.TorchModel`.
+    """ DeepChem wrapper for the InstaDeepAI Nucleotide Transformer.
+    Follows the same API contract as ChemBERTa and MolFormer: fit(),predict(),evaluate(),save_checkpoint(), and restore() all work without modification.
 
     Examples
     --------
     >>> import numpy as np
     >>> import deepchem as dc
-    >>> from deepchem.models.torch_models.nucleotide_transformer import (
-    ...     NucleotideTransformerModel)
+    >>> from deepchem.models.torch_models.nucleotide_transformer import (NucleotideTransformerModel)
     >>>
     >>> seqs  = ['ATCGATCGATCGATCG', 'GCTAGCTAGCTAGCTA']
     >>> X     = np.array(seqs, dtype=object)
     >>> y     = np.array([[1], [0]], dtype=np.float32)
     >>> ds    = dc.data.NumpyDataset(X=X, y=y)
     >>>
-    >>> model = NucleotideTransformerModel(
-    ...     n_tasks=1, mode='classification',
-    ...     model_path='v2-100m-multi-species',
-    ...     batch_size=2)
+    >>> model = NucleotideTransformerModel(n_tasks=1, mode='classification',model_path='v2-100m-multi-species',batch_size=2)
     >>> _ = model.fit(ds, nb_epoch=1)
-    >>> preds = model.predict(ds)   # ndarray (2, 1)
+    >>> preds = model.predict(ds)   # ndarray (2, 1
     """
 
     def __init__(
@@ -232,13 +172,7 @@ class NucleotideTransformerModel(TorchModel):
             model_path, trust_remote_code=True)
 
     def _tokenize(self, sequences: List[str]) -> Dict[str, torch.Tensor]:
-        return self._tokenizer(
-            sequences,
-            return_tensors="pt",
-            padding="max_length",
-            max_length=self.max_seq_length,
-            truncation=True,
-        )
+        return self._tokenizer(sequences,return_tensors="pt",padding="max_length",max_length=self.max_seq_length,truncation=True,)
 
     def default_generator(
         self,
@@ -248,13 +182,7 @@ class NucleotideTransformerModel(TorchModel):
         deterministic: bool = True,
         pad_batches: bool = True,
     ) -> Iterable:
-        """
-        Yield ``(inputs, labels, weights)`` tuples.
-
-        ``dataset.X`` is expected to be an object array of raw DNA strings.
-        We tokenise each batch here so no featurisation step is needed
-        when calling ``fit()`` or ``predict()``.
-        """
+        
         for _ in range(epochs):
             for X_b, y_b, w_b, _ in dataset.iterbatches(
                 batch_size=self.batch_size,
@@ -276,20 +204,7 @@ class NucleotideTransformerModel(TorchModel):
         sequences: List[str],
         pooling: str = "mean",
     ) -> np.ndarray:
-        """
-        Extract sequence embeddings from the last transformer layer.
-
-        Parameters
-        ----------
-        sequences : list[str]
-            Raw DNA strings.
-        pooling : 'mean' | 'cls'
-            How to aggregate the per-token hidden states.
-
-        Returns
-        -------
-        np.ndarray  shape (N, hidden_size)
-        """
+        """ Extract sequence embeddings from the last transformer layer. """
         self.model.eval()
         out: List[np.ndarray] = []
 
@@ -322,13 +237,5 @@ class NucleotideTransformerModel(TorchModel):
 
 
     def pretrain(self, dataset, nb_epoch: int = 1, **_kwargs):
-        """
-        Scaffold for masked-language-model pre-training on DNA sequences.
-
-        Planned for GSoC Weeks 8–9.  Fine-tuning via ``fit()`` is fully
-        functional.
-        """
-        raise NotImplementedError(
-            "Continued pre-training (MLM) is scheduled for Weeks 8–9 of "
-            "the GSoC timeline.  Use fit() for supervised fine-tuning."
-        )
+        """ Scaffold for masked-language-model pre-training on DNA sequences to be continued."""
+        raise NotImplementedError( )
