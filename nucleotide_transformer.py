@@ -44,9 +44,6 @@ class _NTModule(nn.Module):
         head_dropout: float = 0.1,
     ):
         super().__init__()
-        if not HAS_TRANSFORMERS:
-            raise ImportError("pip install transformers")
-
         self.mode = mode
         self.backbone = AutoModel.from_pretrained(
             model_path, trust_remote_code=True)
@@ -102,12 +99,10 @@ class NucleotideTransformerModel(TorchModel):
     >>> import numpy as np
     >>> import deepchem as dc
     >>> from deepchem.models.torch_models.nucleotide_transformer import (NucleotideTransformerModel)
-    >>>
     >>> seqs  = ['ATCGATCGATCGATCG', 'GCTAGCTAGCTAGCTA']
     >>> X     = np.array(seqs, dtype=object)
     >>> y     = np.array([[1], [0]], dtype=np.float32)
     >>> ds    = dc.data.NumpyDataset(X=X, y=y)
-    >>>
     >>> model = NucleotideTransformerModel(n_tasks=1, mode='classification',model_path='v2-100m-multi-species',batch_size=2)
     >>> _ = model.fit(ds, nb_epoch=1)
     >>> preds = model.predict(ds)   # ndarray (2, 1
@@ -125,9 +120,6 @@ class NucleotideTransformerModel(TorchModel):
         learning_rate: float = 2e-5,
         **kwargs,
     ):
-        if not HAS_TRANSFORMERS:
-            raise ImportError("pip install transformers")
-
         if model_path in NUCLEOTIDE_TRANSFORMER_MODELS:
             model_path = NUCLEOTIDE_TRANSFORMER_MODELS[model_path]
 
@@ -136,13 +128,7 @@ class NucleotideTransformerModel(TorchModel):
         self.model_path     = model_path
         self.max_seq_length = max_seq_length
 
-        pt_model = _NTModule(
-            model_path=model_path,
-            n_tasks=n_tasks,
-            mode=mode,
-            freeze_backbone=freeze_backbone,
-            head_dropout=head_dropout,
-        )
+        pt_model = _NTModule(model_path=model_path,n_tasks=n_tasks,mode=mode,freeze_backbone=freeze_backbone,head_dropout=head_dropout,)
 
         if HAS_DC:
             loss = SigmoidCrossEntropy() if mode == "classification" else L2Loss()
