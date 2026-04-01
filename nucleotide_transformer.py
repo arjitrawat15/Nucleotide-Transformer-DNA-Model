@@ -48,7 +48,6 @@ try:
     HAS_DC = True
 except ImportError:
     HAS_DC = False
-    # allow standalone import during development / CI without full dc install
     class TorchModel:  # type: ignore
         pass
 
@@ -57,8 +56,7 @@ try:
     HAS_TRANSFORMERS = True
 except ImportError:
     HAS_TRANSFORMERS = False
-
-# ── model registry ────────────────────────────────────────────────────────────
+    
 NUCLEOTIDE_TRANSFORMER_MODELS: Dict[str, str] = {
     "v2-100m-multi-species":
         "InstaDeepAI/nucleotide-transformer-v2-100m-multi-species",
@@ -76,11 +74,6 @@ NUCLEOTIDE_TRANSFORMER_MODELS: Dict[str, str] = {
         "InstaDeepAI/nucleotide-transformer-2.5b-1000g",
 }
 DEFAULT_NT_MODEL = "v2-100m-multi-species"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  Internal PyTorch module
-# ─────────────────────────────────────────────────────────────────────────────
 
 class _NTModule(nn.Module):
     """Backbone + MLP task head.  Owned by NucleotideTransformerModel."""
@@ -107,7 +100,6 @@ class _NTModule(nn.Module):
                 p.requires_grad = False
             logger.info("Backbone frozen — running linear-probe mode.")
 
-        # Two-layer MLP head — matches ChemBERTa / MolFormer head design
         self.head = nn.Sequential(
             nn.LayerNorm(H),
             nn.Dropout(head_dropout),
@@ -143,9 +135,6 @@ class _NTModule(nn.Module):
         return self.head(pooled)                             # (B, n_tasks)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Public DeepChem model
-# ─────────────────────────────────────────────────────────────────────────────
 
 class NucleotideTransformerModel(TorchModel):
     """
@@ -210,7 +199,6 @@ class NucleotideTransformerModel(TorchModel):
         if not HAS_TRANSFORMERS:
             raise ImportError("pip install transformers")
 
-        # resolve short alias
         if model_path in NUCLEOTIDE_TRANSFORMER_MODELS:
             model_path = NUCLEOTIDE_TRANSFORMER_MODELS[model_path]
 
@@ -243,8 +231,6 @@ class NucleotideTransformerModel(TorchModel):
         self._tokenizer = AutoTokenizer.from_pretrained(
             model_path, trust_remote_code=True)
 
-    # ── internal helpers ──────────────────────────────────────────────────────
-
     def _tokenize(self, sequences: List[str]) -> Dict[str, torch.Tensor]:
         return self._tokenizer(
             sequences,
@@ -253,8 +239,6 @@ class NucleotideTransformerModel(TorchModel):
             max_length=self.max_seq_length,
             truncation=True,
         )
-
-    # ── TorchModel override ───────────────────────────────────────────────────
 
     def default_generator(
         self,
@@ -286,8 +270,6 @@ class NucleotideTransformerModel(TorchModel):
                     yield (inputs, [], [])
                 else:
                     yield (inputs, [y_b], [w_b])
-
-    # ── embedding extraction ──────────────────────────────────────────────────
 
     def get_embeddings(
         self,
@@ -338,7 +320,6 @@ class NucleotideTransformerModel(TorchModel):
 
         return np.concatenate(out, axis=0)
 
-    # ── pre-training scaffold ─────────────────────────────────────────────────
 
     def pretrain(self, dataset, nb_epoch: int = 1, **_kwargs):
         """
