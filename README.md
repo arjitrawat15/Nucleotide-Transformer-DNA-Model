@@ -447,10 +447,10 @@ DNA foundation models are to genomics what ChemBERTa is to drug discovery. DeepC
 
 ## About the Author
 
-**Arjit** — currently working on LLM fine-tuning (OLMo-1B/7B) on molecular datasets (ClinTox, Tox21, HIV) and building HuggingFace model integrations inside DeepChem. Mentored by Harindhar.
+**Arjit**,currently working on LLM fine-tuning (OLMo-1B/7B) on molecular datasets (ClinTox, Tox21, HIV) and building HuggingFace model integrations inside DeepChem.
 
 **Relevant proof of work:**
-- OLMo-7B fine-tuning on ClinTox achieving competitive ROC-AUC vs ChemBERTa-100M
+- OLMo-7B fine-tuning on achieving competitive ROC-AUC vs ChemBERTa-100M
 - Working implementation of this prototype (all tests passing)
 - Active DeepChem contributor — studying ChemBERTa, MolFormer, HuggingFaceModel wrappers
 
